@@ -21,7 +21,7 @@ VOLUME ["/tmp"]
 
 EXPOSE 30000-50000/udp
 
-COPY ./entrypoin.rtpengine.sh /entrypoint.sh
+COPY ./entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 
