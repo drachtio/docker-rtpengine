@@ -23,6 +23,8 @@ EXPOSE 30000-50000/udp
 
 COPY ./entrypoint.sh /entrypoint.sh
 
+COPY ./rtpengine.conf /etc
+
 ENTRYPOINT ["/entrypoint.sh"]
 
 CMD ["rtpengine"]
