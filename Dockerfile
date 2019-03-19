@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM debian:jessie-slim
 
 RUN apt-get update \
   && apt-get -y --quiet --force-yes upgrade \
@@ -19,7 +19,7 @@ RUN apt-get update \
 
 VOLUME ["/tmp"]
 
-EXPOSE 30000-50000/udp
+EXPOSE 16384-32768/udp
 
 COPY ./entrypoint.sh /entrypoint.sh
 
