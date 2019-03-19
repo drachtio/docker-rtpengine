@@ -1,7 +1,7 @@
 FROM debian:stretch
 
 RUN apt-get update \
-  && apt-get -y --quiet --force-yes upgrade \
+  && apt-get -y --quiet --force-yes upgrade curl \
   && apt-get install -y --no-install-recommends ca-certificates gcc g++ make build-essential git iptables-dev libavfilter-dev \
   libevent-dev libpcap-dev libxmlrpc-core-c3-dev markdown \
   libjson-glib-dev default-libmysqlclient-dev libhiredis-dev libssl-dev \
