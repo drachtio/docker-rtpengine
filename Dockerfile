@@ -22,7 +22,7 @@ RUN apt-get update \
 
 VOLUME ["/tmp"]
 
-EXPOSE 16384-32768/udp
+EXPOSE 23000-32768/udp 22222/udp
 
 COPY ./entrypoint.sh /entrypoint.sh
 
