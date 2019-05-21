@@ -1,4 +1,4 @@
-FROM debian:stretch
+FROM debian:stretch-slim
 
 RUN apt-get update \
   && apt-get -y --quiet --force-yes upgrade curl \
@@ -18,6 +18,7 @@ RUN apt-get update \
   && rm -rf /var/lib/dpkg/* \
   && rm -rf /var/lib/cache/* \
   && rm -Rf /var/log/* \
+  && rm -Rf /usr/locall/src/* \
   && rm -Rf /var/lib/apt/lists/* 
 
 VOLUME ["/tmp"]
