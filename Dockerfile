@@ -1,4 +1,4 @@
-FROM debian:stretch
+FROM debian:stretch-slim
 
 RUN apt-get update \
   && apt-get -y --quiet --force-yes upgrade curl \
@@ -7,7 +7,7 @@ RUN apt-get update \
   libjson-glib-dev default-libmysqlclient-dev libhiredis-dev libssl-dev \
   libcurl4-openssl-dev libavcodec-extra gperf \
   && cd /usr/local/src \
-  && git clone -b mr7.1 https://github.com/sipwise/rtpengine.git \
+  && git clone https://github.com/sipwise/rtpengine.git \
   && cd rtpengine/daemon \
   && make && make install \
   && cp /usr/local/src/rtpengine/daemon/rtpengine /usr/local/bin/rtpengine \
@@ -18,6 +18,7 @@ RUN apt-get update \
   && rm -rf /var/lib/dpkg/* \
   && rm -rf /var/lib/cache/* \
   && rm -Rf /var/log/* \
+  && rm -Rf /usr/local/src/* \
   && rm -Rf /var/lib/apt/lists/* 
 
 VOLUME ["/tmp"]
