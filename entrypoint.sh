@@ -30,11 +30,11 @@ else
   MY_IP=`ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/'`
 fi
 
-sed -i -e "s/interface=MY_IP/interface=$MY_IP/g" /etc/rtpengine.conf
+sed -i -e "s/MY_IP/$MY_IP/g" /etc/rtpengine.conf
 
 if [ "$1" = 'rtpengine' ]; then
   shift
-  exec rtpengine --config-file /etc/rtpengine.conf "$@"
+  exec rtpengine --config-file /etc/rtpengine.conf  "$@"
 fi
 
 exec "$@"

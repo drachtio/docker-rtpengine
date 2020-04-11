@@ -1,4 +1,4 @@
-FROM debian:stretch-slim
+FROM debian:stretch
 
 RUN apt-get update \
   && apt-get -y --quiet --force-yes upgrade curl iproute2 \
