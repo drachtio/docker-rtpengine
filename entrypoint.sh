@@ -3,7 +3,7 @@ set -e
 
 PATH=/usr/local/bin:$PATH
 
-case $CLOUD in 
+case $CLOUD in
   gcp)
     LOCAL_IP=$(curl -s -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/ip)
     PUBLIC_IP=$(curl -s -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)
