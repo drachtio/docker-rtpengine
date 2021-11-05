@@ -40,16 +40,15 @@ if [ -z "$RTP_END_PORT" ]; then
   RTP_END_PORT=60000
 fi
 if [ -z "$LOGLEVEL" ]; then
-  LOGLEVEL=7
+  LOGLEVEL=6
 fi
 
-echo "LOGLEVEL is $LOGLEVEL"
+sed -i -e "s/LOCAL_IP/$LOCAL_IP/g" /etc/rtpengine.conf
+sed -i -e "s/PUBLIC_IP/$PUBLIC_IP/g" /etc/rtpengine.conf
 
 if [ "$1" = 'rtpengine' ]; then
   shift
-  echo "starting rtpengine"
-  echo "rtpengine --interface private/${LOCAL_IP} --interface public/${LOCAL_IP}'!'${PUBLIC_IP} --listen-ng=22222 --listen-http=8080 --listen-udp=12222 --dtmf-log-dest=127.0.0.1:22223 --listen-cli=127.0.0.1:9900 --pidfile /var/run/rtpengine.pid --port-min ${RTP_START_PORT} --port-max ${RTP_END_PORT} --recording-dir /tmp --recording-method pcap --recording-format eth --log-level ${LOGLEVEL} --delete-delay 0 $@"
-  exec rtpengine --interface private/${LOCAL_IP} --interface "public/${LOCAL_IP}'!'${PUBLIC_IP}" --listen-ng=22222 --listen-http=8080 --listen-udp=12222 --dtmf-log-dest=127.0.0.1:22223 --listen-cli=127.0.0.1:9900 --pidfile /var/run/rtpengine.pid --port-min ${RTP_START_PORT} --port-max ${RTP_END_PORT} --recording-dir /tmp --recording-method pcap --recording-format eth --log-level ${LOGLEVEL} --delete-delay 0
+  exec rtpengine --config-file /etc/rtpengine.conf --log-level ${LOGLEVEL} --port-min ${RTP_START_PORT} --port-max ${RTP_END_PORT} --listen-ng=22222 --listen-http=8080 --listen-udp=12222 --dtmf-log-dest=127.0.0.1:22223 --listen-cli=127.0.0.1:9900 --pidfile /var/run/rtpengine.pid --recording-dir /tmp --recording-method pcap --recording-format eth --delete-delay 0 --log-stderr --foreground $@
 else 
   exec "$@"
 fi
