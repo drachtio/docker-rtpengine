@@ -39,6 +39,7 @@ VOLUME ["/tmp"]
 EXPOSE 23000-32768/udp 22222/udp
 
 COPY ./entrypoint.sh /entrypoint.sh
+COPY ./rtpengine.conf /etc/rtpengine.conf
 
 ENTRYPOINT ["/entrypoint.sh"]
 
