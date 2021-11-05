@@ -28,17 +28,33 @@ case $CLOUD in
     ;;
 esac
 
-if [ -n "$PUBLIC_IP" ]; then
-  MY_IP="$LOCAL_IP"!"$PUBLIC_IP"
-else
-  MY_IP=`ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/'`
+if [ -z "$PUBLIC_IP" ]; then
+  LOCAL_IP=`ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/'`
+  PUBLIC_IP=`ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/'`
 fi
 
-sed -i -e "s/MY_IP/$MY_IP/g" /etc/rtpengine.conf
+if [ -z "$RTP_START_PORT" ]; then
+  RTP_START_PORT=40000
+fi
+if [ -z "$RTP_END_PORT" ]; then
+  RTP_END_PORT=60000
+fi
+if [ -z "$LOGLEVEL" ]; then
+  LOGLEVEL=7
+fi
+
+echo "LOGLEVEL is $LOGLEVEL"
 
 if [ "$1" = 'rtpengine' ]; then
   shift
-  exec rtpengine --config-file /etc/rtpengine.conf  "$@"
+  echo "starting rtpengine"
+  echo "rtpengine --interface private/${LOCAL_IP} --interface public/${LOCAL_IP}'!'${PUBLIC_IP} --listen-ng=22222 --listen-http=8080 --listen-udp=12222 --dtmf-log-dest=127.0.0.1:22223 --listen-cli=127.0.0.1:9900 --pidfile /var/run/rtpengine.pid --port-min ${RTP_START_PORT} --port-max ${RTP_END_PORT} --recording-dir /tmp --recording-method pcap --recording-format eth --log-level ${LOGLEVEL} --delete-delay 0 $@"
+  exec rtpengine --interface private/${LOCAL_IP} --interface "public/${LOCAL_IP}'!'${PUBLIC_IP}" --listen-ng=22222 --listen-http=8080 --listen-udp=12222 --dtmf-log-dest=127.0.0.1:22223 --listen-cli=127.0.0.1:9900 --pidfile /var/run/rtpengine.pid --port-min ${RTP_START_PORT} --port-max ${RTP_END_PORT} --recording-dir /tmp --recording-method pcap --recording-format eth --log-level ${LOGLEVEL} --delete-delay 0
+else 
+  exec "$@"
 fi
+<<<<<<< HEAD
 
 exec "$@"
+=======
+>>>>>>> edd8a2f (more WIP)
