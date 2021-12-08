@@ -39,12 +39,9 @@ if [ -z "$LOGLEVEL" ]; then
   LOGLEVEL=6
 fi
 
-sed -i -e "s/LOCAL_IP/$LOCAL_IP/g" /etc/rtpengine.conf
-sed -i -e "s/PUBLIC_IP/$PUBLIC_IP/g" /etc/rtpengine.conf
-
 if [ "$1" = 'rtpengine' ]; then
   shift
-  exec rtpengine --config-file /etc/rtpengine.conf --log-level ${LOGLEVEL} --port-min ${RTP_START_PORT} --port-max ${RTP_END_PORT} --listen-ng=22222 --listen-http=8080 --listen-udp=12222 --dtmf-log-dest=127.0.0.1:22223 --listen-cli=127.0.0.1:9900 --pidfile /var/run/rtpengine.pid --recording-dir /tmp --recording-method pcap --recording-format eth --delete-delay 0 --log-stderr --foreground $@
+  exec rtpengine --interface private/${LOCAL_IP} --interface public/${PUBLIC_IP} --log-level ${LOGLEVEL} --port-min ${RTP_START_PORT} --port-max ${RTP_END_PORT} --listen-ng=22222 --listen-http=8080 --listen-udp=12222 --dtmf-log-dest=127.0.0.1:22223 --listen-cli=127.0.0.1:9900 --pidfile /var/run/rtpengine.pid --recording-dir /tmp --recording-method pcap --recording-format eth --delete-delay 0 --log-stderr --foreground $@
 else 
   exec "$@"
 fi
