@@ -42,7 +42,7 @@ fi
 if [ "$1" = 'rtpengine' ]; then
   shift
   exec rtpengine \
-  --interface private/${LOCAL_IP} --interface public/${PUBLIC_IP} \
+  --interface private/${LOCAL_IP} --interface public/${LOCAL_IP}!${PUBLIC_IP} \
   --port-min ${RTP_START_PORT} --port-max ${RTP_END_PORT} \
   --log-level ${LOGLEVEL} --port-min ${RTP_START_PORT} --port-max ${RTP_END_PORT} \
   --listen-ng=22222 --listen-http=8080 --listen-udp=12222 \
