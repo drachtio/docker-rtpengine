@@ -48,26 +48,13 @@ if [ -z "$LOGLEVEL" ]; then
   LOGLEVEL=5
 fi
 
+echo "LOGLEVEL is $LOGLEVEL"
+
 if [ "$1" = 'rtpengine' ]; then
   shift
-  exec rtpengine \
-  --interface private/${LOCAL_IP} --interface public/${LOCAL_IP}!${PUBLIC_IP} \
-  --port-min ${RTP_START_PORT} --port-max ${RTP_END_PORT} \
-  --log-level ${LOGLEVEL} --port-min ${RTP_START_PORT} --port-max ${RTP_END_PORT} \
-  --listen-ng=22222 --listen-http=8080 --listen-udp=12222 \
-  --dtmf-log-dest=127.0.0.1:22223 \
-  --listen-cli=127.0.0.1:9900 \
-  --pidfile /var/run/rtpengine.pid \
-  --recording-dir /tmp --recording-method pcap --recording-format eth \
-  --delete-delay 0 \
-  --log-stderr \
-  --foreground \
-  $@
+  echo "starting rtpengine"
+  echo "rtpengine --interface private/${LOCAL_IP} --interface public/${LOCAL_IP}'!'${PUBLIC_IP} --listen-ng=22222 --listen-http=8080 --listen-udp=12222 --dtmf-log-dest=127.0.0.1:22223 --listen-cli=127.0.0.1:9900 --pidfile /var/run/rtpengine.pid --port-min ${RTP_START_PORT} --port-max ${RTP_END_PORT} --recording-dir /tmp --recording-method pcap --recording-format eth --log-level ${LOGLEVEL} --delete-delay 0 $@"
+  exec rtpengine --interface private/${LOCAL_IP} --interface "public/${LOCAL_IP}'!'${PUBLIC_IP}" --listen-ng=22222 --listen-http=8080 --listen-udp=12222 --dtmf-log-dest=127.0.0.1:22223 --listen-cli=127.0.0.1:9900 --pidfile /var/run/rtpengine.pid --port-min ${RTP_START_PORT} --port-max ${RTP_END_PORT} --recording-dir /tmp --recording-method pcap --recording-format eth --log-level ${LOGLEVEL} --delete-delay 0
 else 
   exec "$@"
 fi
-<<<<<<< HEAD
-
-exec "$@"
-=======
->>>>>>> edd8a2f (more WIP)
