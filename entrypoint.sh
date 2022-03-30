@@ -7,6 +7,8 @@ case $CLOUD in
   gcp)
     LOCAL_IP=$(curl -s -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/ip)
     PUBLIC_IP=$(curl -s -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)
+    PRIVATE_INTERFACE="private/${LOCAL_IP}"
+    PUBLIC_INTERFACE="public/${LOCAL_IP}!${PUBLIC_IP}"
     ;;
   aws)
     if [ -z "$IMDSv2" ]; then
@@ -16,14 +18,20 @@ case $CLOUD in
       LOCAL_IP=$(TOKEN=`curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` && curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/local-ipv4)
       PUBLIC_IP=$(TOKEN=`curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` && curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/public-ipv4)
     fi
+    PRIVATE_INTERFACE="private/${LOCAL_IP}"
+    PUBLIC_INTERFACE="public/${LOCAL_IP}!${PUBLIC_IP}"
     ;;
   digitalocean)
     LOCAL_IP=$(curl -s http://169.254.169.254/metadata/v1/interfaces/private/0/ipv4/address)
     PUBLIC_IP=$(curl -s http://169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
+    PRIVATE_INTERFACE="private/${LOCAL_IP}"
+    PUBLIC_INTERFACE="public/${PUBLIC_IP}"
     ;;
   azure)
     LOCAL_IP=$(curl -H Metadata:true "http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/privateIpAddress?api-version=2017-08-01&format=text")
     PUBLIC_IP=$(curl -H Metadata:true "http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/publicIpAddress?api-version=2017-08-01&format=text")
+    PRIVATE_INTERFACE="private/${LOCAL_IP}"
+    PUBLIC_INTERFACE="public/${LOCAL_IP}!${PUBLIC_IP}"
     ;;
   *)
     ;;
@@ -32,6 +40,8 @@ esac
 if [ -z "$PUBLIC_IP" ]; then
   LOCAL_IP=`ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/'`
   PUBLIC_IP=`ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/'`
+  PRIVATE_INTERFACE="private/${LOCAL_IP}"
+  PUBLIC_INTERFACE="public/${LOCAL_IP}!${PUBLIC_IP}"
 fi
 
 if [ -z "$RTP_START_PORT" ]; then
@@ -47,7 +57,7 @@ fi
 if [ "$1" = 'rtpengine' ]; then
   shift
   exec rtpengine \
-  --interface private/${LOCAL_IP} --interface public/${LOCAL_IP}!${PUBLIC_IP} \
+  --interface ${PRIVATE_INTERFACE} --interface ${PUBLIC_INTERFACE} \
   --port-min ${RTP_START_PORT} --port-max ${RTP_END_PORT} \
   --log-level ${LOGLEVEL} --port-min ${RTP_START_PORT} --port-max ${RTP_END_PORT} \
   --listen-ng=22222 --listen-http=8080 --listen-udp=12222 \
