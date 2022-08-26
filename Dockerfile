@@ -15,7 +15,7 @@ RUN apt-get update \
   && git clone https://github.com/warmcat/libwebsockets.git -b v3.2.3 \
   && cd /usr/local/src/libwebsockets \
   && mkdir -p build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo && make && make install \
-  && git clone https://github.com/sipwise/rtpengine.git -b mr10.4.1.4 \
+  && git clone https://github.com/sipwise/rtpengine.git -b mr10.5.1.3 \
   && cd rtpengine/daemon \
   && make with_transcoding=yes \
   && find . -name rtpengine \
