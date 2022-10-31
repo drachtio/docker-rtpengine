@@ -1,4 +1,4 @@
-FROM debian:buster
+FROM debian:buster-slim
 
 RUN apt-get update \
   && apt-get -y --quiet --force-yes upgrade curl iproute2 \
@@ -15,7 +15,7 @@ RUN apt-get update \
   && git clone https://github.com/warmcat/libwebsockets.git -b v3.2.3 \
   && cd /usr/local/src/libwebsockets \
   && mkdir -p build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo && make && make install \
-  && git clone https://github.com/sipwise/rtpengine.git -b mr10.5.1.3 \
+  && git clone https://github.com/sipwise/rtpengine.git -b mr11.1.1.1 \
   && cd rtpengine/daemon \
   && make with_transcoding=yes \
   && find . -name rtpengine \
