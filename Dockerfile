@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 RUN apt-get update \
   && apt-get -y --quiet --force-yes upgrade curl iproute2 \
