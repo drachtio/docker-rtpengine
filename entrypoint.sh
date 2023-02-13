@@ -24,8 +24,12 @@ case $CLOUD in
     ;;
 esac
 
-if [ -n "$PUBLIC_IP" ]; then
+if [ -n "$PUBLIC_IP" ] && [ -n "$LOCAL_IP" ]; then
   MY_IP="$LOCAL_IP"!"$PUBLIC_IP"
+elif [ -n "$PUBLIC_IP" ]; then
+  MY_IP="$PUBLIC_IP"
+elif [ -n "$LOCAL_IP" ]; then
+  MY_IP="$LOCAL_IP"
 else
   MY_IP=`ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/'`
 fi
