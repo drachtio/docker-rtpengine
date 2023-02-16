@@ -1,11 +1,17 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 RUN apt-get update \
+  && apt-get remove --auto-remove nftables \
+  && apt-get purge nftables \
   && apt-get -y --quiet --force-yes upgrade curl iproute2 \
-  && apt-get install -y --no-install-recommends ca-certificates gcc g++ make cmake  build-essential git iptables-dev libavfilter-dev \
+  && apt-get install -y --no-install-recommends ca-certificates gcc g++ make cmake  build-essential git libavfilter-dev \
   libevent-dev libpcap-dev libxmlrpc-core-c3-dev markdown  \
   libjson-glib-dev default-libmysqlclient-dev libhiredis-dev libssl-dev \
   libcurl4-openssl-dev libavcodec-extra gperf libspandsp-dev \
+  libxtables-dev libip6tc-dev libip4tc-dev  libiptc-dev \
+  libjpeg-dev libsqlite3-dev libpcre3-dev libldns-dev \
+  libspeex-dev libspeexdsp-dev libedit-dev libtiff-dev yasm libswscale-dev haveged \
+  libopus-dev libopusfile-dev libsndfile-dev libshout3-dev libmpg123-dev libmp3lame-dev \
   && cd /usr/local/src \
   && git clone https://github.com/BelledonneCommunications/bcg729.git \
   && cd bcg729 \
