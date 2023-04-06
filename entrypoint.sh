@@ -37,6 +37,10 @@ case $CLOUD in
     PRIVATE_INTERFACE="private/${LOCAL_IP}"
     PUBLIC_INTERFACE="public/${LOCAL_IP}!${PUBLIC_IP}"
     ;;
+ scaleway)
+    LOCAL_IP=$(curl -s --local-port 1-1024 http://169.254.42.42/conf | grep PRIVATE_IP | cut -d = -f 2)
+    PUBLIC_IP=$(curl -s --local-port 1-1024 http://169.254.42.42/conf | grep PUBLIC_IP_ADDRESS | cut -d = -f 2)
+    ;;
   *)
     ;;
 esac
