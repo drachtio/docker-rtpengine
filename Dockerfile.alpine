@@ -1,0 +1,64 @@
+FROM alpine:3.18 AS build
+
+RUN apk add --no-cache \
+  ca-certificates \
+  curl-dev \
+  ffmpeg-dev \
+  g++ \
+  gcc \
+  git \
+  gperf \
+  glib-dev \
+  hiredis-dev \
+  iptables-dev \
+  json-glib-dev \
+  libevent-dev \
+  libpcap-dev \
+  libwebsockets-dev \
+  make \
+  mariadb-connector-c-dev \
+  markdown \
+  openssl-dev \
+  opus-dev \
+  pandoc \
+  pcre-dev \
+  spandsp-dev \
+  xmlrpc-c-dev
+
+WORKDIR /usr/src
+RUN git clone https://github.com/sipwise/rtpengine
+RUN sed -i 's:/bin/bash:/bin/sh:' rtpengine/utils/build_test_wrapper
+WORKDIR /usr/src/rtpengine/daemon
+RUN make -j$(nproc) install
+
+FROM alpine:3.18
+
+VOLUME ["/tmp"]
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["rtpengine"]
+
+EXPOSE 23000-32768/udp 22222/udp
+
+RUN apk add --no-cache \
+  bash \
+  ca-certificates \
+  curl \
+  ffmpeg-libavcodec \
+  ffmpeg-libavformat \
+  glib \
+  hiredis \
+  iptables \
+  json-glib \
+  libevent \
+  libpcap \
+  libwebsockets \
+  mariadb-connector-c \
+  openssl \
+  opus \
+  pcre \
+  spandsp \
+  xmlrpc-c-client
+
+COPY --from=build /usr/src/rtpengine/daemon/rtpengine /usr/local/bin/rtpengine
+COPY ./entrypoint.sh /entrypoint.sh
+COPY ./rtpengine.conf /etc
