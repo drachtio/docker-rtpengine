@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 RUN apt-get update \
   && apt-get remove --auto-remove nftables \
@@ -9,7 +9,7 @@ RUN apt-get update \
   libjson-glib-dev default-libmysqlclient-dev libhiredis-dev libssl-dev \
   libcurl4-openssl-dev libavcodec-extra gperf libspandsp-dev \
   libxtables-dev libip6tc-dev libip4tc-dev  libiptc-dev \
-  libjpeg-dev libsqlite3-dev libpcre3-dev libldns-dev \
+  libjpeg-dev libsqlite3-dev libpcre3-dev libldns-dev pandoc \
   libspeex-dev libspeexdsp-dev libedit-dev libtiff-dev yasm libswscale-dev haveged \
   libopus-dev libopusfile-dev libsndfile-dev libshout3-dev libmpg123-dev libmp3lame-dev \
   && cd /usr/local/src \
@@ -18,10 +18,10 @@ RUN apt-get update \
   && echo "building bcg729" \
   && cmake . -DCMAKE_INSTALL_PREFIX=/usr && make && make install \
   && cd /usr/local/src \
-  && git clone https://github.com/warmcat/libwebsockets.git -b v3.2.3 \
+  && git clone https://github.com/warmcat/libwebsockets.git -b v4.3.2 \
   && cd /usr/local/src/libwebsockets \
   && mkdir -p build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo && make && make install \
-  && git clone https://github.com/sipwise/rtpengine.git -b mr11.2.1.2 \
+  && git clone https://github.com/sipwise/rtpengine.git -b mr11.4.1.3 \
   && cd rtpengine/daemon \
   && make with_transcoding=yes \
   && find . -name rtpengine \
