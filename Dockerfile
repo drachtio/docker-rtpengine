@@ -8,13 +8,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libevent-dev libhiredis-dev libiptc-dev libjson-glib-dev \
   libopus-dev libpcap-dev libpcre3-dev libspandsp-dev \
   libssl-dev libwebsockets-dev libxmlrpc-core-c3-dev \
-  markdown pandoc
+  markdown pandoc default-libmysqlclient-dev gperf
 
 WORKDIR /usr/local/src
 
 RUN git clone https://github.com/BelledonneCommunications/bcg729.git \
   && cd bcg729 \
   && cmake . -DCMAKE_INSTALL_PREFIX=/usr && make -j$(nproc) && make install
+
+RUN git clone https://github.com/warmcat/libwebsockets.git -b v4.3.2 \
+  && cd /usr/local/src/libwebsockets \
+  && mkdir -p build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo && make -j ${BUILD_CPUS} && make install
 
 RUN git clone https://github.com/sipwise/rtpengine.git -b mr11.5.1.24 \
   && cd rtpengine/daemon \
