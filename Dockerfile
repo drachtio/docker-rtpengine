@@ -1,46 +1,43 @@
-FROM debian:bookworm-slim
-ARG BUILD_CPUS=1
-RUN apt-get update \
-  && apt-get remove --auto-remove nftables \
-  && apt-get purge nftables \
-  && apt-get -y --quiet --force-yes upgrade curl iproute2 \
-  && apt-get install -y --no-install-recommends ca-certificates gcc g++ make cmake  build-essential git libavfilter-dev \
-  libevent-dev libpcap-dev libxmlrpc-core-c3-dev markdown  \
-  libjson-glib-dev default-libmysqlclient-dev libhiredis-dev libssl-dev \
-  libcurl4-openssl-dev libavcodec-extra gperf libspandsp-dev \
-  libxtables-dev libip6tc-dev libip4tc-dev  libiptc-dev \
-  libjpeg-dev libsqlite3-dev libpcre3-dev libldns-dev libmnl-dev libnftnl-dev pandoc \
-  libspeex-dev libspeexdsp-dev libedit-dev libtiff-dev yasm libswscale-dev haveged \
-  libopus-dev libopusfile-dev libsndfile-dev libshout3-dev libmpg123-dev libmp3lame-dev \
-  && cd /usr/local/src \
-  && git clone https://github.com/BelledonneCommunications/bcg729.git \
+FROM debian:bookworm-slim as build
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  build-essential \
+  ca-certificates \
+  gcc g++ make cmake git \
+  libavcodec-extra libavfilter-dev libcurl4-openssl-dev \
+  libevent-dev libhiredis-dev libiptc-dev libjson-glib-dev \
+  libopus-dev libpcap-dev libpcre3-dev libspandsp-dev \
+  libssl-dev libwebsockets-dev libxmlrpc-core-c3-dev \
+  markdown pandoc
+
+WORKDIR /usr/local/src
+
+RUN git clone https://github.com/BelledonneCommunications/bcg729.git \
   && cd bcg729 \
-  && echo "building bcg729" \
-  && cmake . -DCMAKE_INSTALL_PREFIX=/usr && make -j ${BUILD_CPUS} && make install \
-  && cd /usr/local/src \
-  && git clone https://github.com/warmcat/libwebsockets.git -b v4.3.2 \
-  && cd /usr/local/src/libwebsockets \
-  && mkdir -p build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo && make -j ${BUILD_CPUS} && make install \
-  && git clone https://github.com/sipwise/rtpengine.git -b mr11.5.1.24 \
+  && cmake . -DCMAKE_INSTALL_PREFIX=/usr && make -j$(nproc) && make install
+
+RUN git clone https://github.com/sipwise/rtpengine.git -b mr11.5.1.24 \
   && cd rtpengine/daemon \
-  && make -j ${BUILD_CPUS} with_transcoding=yes \
-  && find . -name rtpengine \
-  && cp rtpengine /usr/local/bin/rtpengine \
-  && rm -Rf /usr/local/src/rtpengine \
-  && apt-get purge -y --quiet --force-yes --auto-remove \
-  ca-certificates gcc g++ make build-essential git markdown \
-  && rm -rf /var/lib/apt/* \
-  && rm -rf /var/lib/dpkg/* \
-  && rm -rf /var/lib/cache/* \
-  && rm -Rf /var/log/* \
-  && rm -Rf /usr/local/src/* \
-  && rm -Rf /var/lib/apt/lists/* 
+  && make -j$(nproc) with_transcoding=yes \
+  && cp rtpengine /usr/local/bin/rtpengine
+
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  curl iproute2 \
+  libavcodec59 libavformat59 libevent-2.1-7 libevent-pthreads-2.1-7 \
+  libglib2.0-0 libhiredis0.14 libip4tc2 libip6tc2 \
+  libjson-glib-1.0-0 libmariadb3 libpcap0.8 libpcre3 libspandsp2 \
+  libwebsockets17 libxmlrpc-core-c3 \
+  && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*.deb
+
+COPY --from=build /usr/local/bin/rtpengine /usr/local/bin/rtpengine
+
+COPY ./entrypoint.sh /entrypoint.sh
 
 VOLUME ["/tmp"]
 
 EXPOSE 40000-60000/udp 22222/udp
-
-COPY ./entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 

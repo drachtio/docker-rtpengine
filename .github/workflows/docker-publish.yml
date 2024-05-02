@@ -3,7 +3,7 @@ name: Docker
 on:
   push:
     branches:
-      - jambonz
+      - jambonz-test
     tags:
       - '*'
 
@@ -29,7 +29,7 @@ jobs:
             [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
 
             # Use Docker `latest` tag convention
-            [ "$VERSION" == "jambonz" ] && VERSION=latest
+            [ "$VERSION" == "jambonz-test" ] && VERSION=latest-test
 
             echo IMAGE_ID=$IMAGE_ID
             echo VERSION=$VERSION
