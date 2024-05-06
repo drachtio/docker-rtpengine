@@ -1,40 +1,83 @@
-FROM debian:bookworm-slim
-ARG BUILD_CPUS=1
-RUN apt-get update \
-  && apt-get remove --auto-remove nftables \
-  && apt-get purge nftables \
-  && apt-get -y --quiet --force-yes upgrade curl iproute2 \
-  && apt-get install -y --no-install-recommends ca-certificates gcc g++ make cmake  build-essential git libavfilter-dev \
-  libevent-dev libpcap-dev libxmlrpc-core-c3-dev markdown  \
-  libjson-glib-dev default-libmysqlclient-dev libhiredis-dev libssl-dev \
-  libcurl4-openssl-dev libavcodec-extra gperf libspandsp-dev \
-  libxtables-dev libip6tc-dev libip4tc-dev  libiptc-dev \
-  libjpeg-dev libsqlite3-dev libpcre3-dev libldns-dev libmnl-dev libnftnl-dev pandoc \
-  libspeex-dev libspeexdsp-dev libedit-dev libtiff-dev yasm libswscale-dev haveged \
-  libopus-dev libopusfile-dev libsndfile-dev libshout3-dev libmpg123-dev libmp3lame-dev \
-  && cd /usr/local/src \
-  && git clone https://github.com/BelledonneCommunications/bcg729.git \
-  && cd bcg729 \
-  && echo "building bcg729" \
-  && cmake . -DCMAKE_INSTALL_PREFIX=/usr && make -j ${BUILD_CPUS} && make install \
-  && cd /usr/local/src \
-  && git clone https://github.com/warmcat/libwebsockets.git -b v4.3.2 \
-  && cd /usr/local/src/libwebsockets \
-  && mkdir -p build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo && make -j ${BUILD_CPUS} && make install \
-  && git clone https://github.com/sipwise/rtpengine.git -b mr11.5.1.24 \
-  && cd rtpengine/daemon \
-  && make -j ${BUILD_CPUS} with_transcoding=yes \
-  && find . -name rtpengine \
-  && cp rtpengine /usr/local/bin/rtpengine \
-  && rm -Rf /usr/local/src/rtpengine \
-  && apt-get purge -y --quiet --force-yes --auto-remove \
-  ca-certificates gcc g++ make build-essential git markdown \
-  && rm -rf /var/lib/apt/* \
-  && rm -rf /var/lib/dpkg/* \
-  && rm -rf /var/lib/cache/* \
-  && rm -Rf /var/log/* \
-  && rm -Rf /usr/local/src/* \
-  && rm -Rf /var/lib/apt/lists/* 
+FROM alpine:3.19 AS builder
+
+RUN apk add --no-cache \
+  ca-certificates \
+  cmake \
+  curl-dev \
+  ffmpeg-dev \
+  g++ \
+  gcc \
+  git \
+  gperf \
+  glib-dev \
+  hiredis-dev \
+  iptables-dev \
+  json-glib-dev \
+  libevent-dev \
+	libmnl-dev \
+  libnftnl-dev \
+  libpcap-dev \
+  libwebsockets-dev \
+  make \
+  mariadb-connector-c-dev \
+  markdown \
+  openssl-dev \
+  opus-dev \
+  pandoc \
+  pcre-dev \
+  spandsp-dev \
+  xmlrpc-c-dev
+
+
+FROM builder AS bcg729
+
+WORKDIR /usr/src
+RUN git clone https://github.com/BelledonneCommunications/bcg729.git && \
+    cd /usr/src/bcg729 && \
+    cmake . -DCMAKE_INSTALL_PREFIX=/usr && make -j$(nproc) && make install
+
+
+FROM builder AS rtpengine
+
+COPY --from=bcg729 /usr/include/bcg729 /usr/include/bcg729
+COPY --from=bcg729 /usr/lib/libbcg729.a /usr/lib/libbcg729.a
+COPY --from=bcg729 /usr/lib/pkgconfig/libbcg729.pc /usr/lib/pkgconfig/libbcg729.pc
+WORKDIR /usr/src
+RUN git clone https://github.com/sipwise/rtpengine -b mr11.5.1.24 && \
+    sed -i 's:/bin/bash:/bin/sh:' rtpengine/utils/build_test_wrapper && \
+    cd /usr/src/rtpengine/daemon && \
+    make -j$(nproc) with_transcoding=yes && make install
+
+
+FROM alpine:3.19
+
+RUN apk add --no-cache \
+  ca-certificates \
+  curl \
+  ffmpeg-libavcodec \
+  ffmpeg-libavfilter \
+  ffmpeg-libavformat \
+  ffmpeg-libswresample \
+  glib \
+  hiredis \
+  iptables \
+  json-glib \
+  libip4tc \
+  libip6tc \
+  libevent \
+  libmnl \
+  libnftnl \
+  libpcap \
+  libwebsockets \
+  mariadb-connector-c \
+  openssl \
+  opus \
+  pcre \
+  spandsp \
+  xmlrpc-c-client
+
+COPY --from=rtpengine /usr/bin/rtpengine /usr/bin/rtpengine
+COPY --from=bcg729 /usr/lib/libbcg729.a /usr/lib/libbcg729.a
 
 VOLUME ["/tmp"]
 
