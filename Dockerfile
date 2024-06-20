@@ -21,7 +21,7 @@ RUN apt-get update \
   && rm -Rf /usr/local/src/* \
   && rm -Rf /var/lib/apt/lists/* 
 
-VOLUME ["/tmp"]
+VOLUME ["/rec"]
 
 EXPOSE 23000-32768/udp 22222/udp
 
