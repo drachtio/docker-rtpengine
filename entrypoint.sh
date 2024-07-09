@@ -34,6 +34,7 @@ elif [ -n "$LOCAL_IP" ]; then
   MY_IP="$LOCAL_IP"
 else
   MY_IP=`ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/'`
+  LOCAL_IP="$MY_IP"
 fi
 
 sed -i -e "s/interface=MY_IP/interface=$MY_IP/g" /etc/rtpengine.conf
