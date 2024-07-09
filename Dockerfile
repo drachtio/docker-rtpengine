@@ -7,7 +7,7 @@ RUN apt-get update \
   libjson-glib-dev default-libmysqlclient-dev libhiredis-dev libssl-dev \
   libcurl4-openssl-dev libavcodec-extra gperf libspandsp-dev libwebsockets-dev\
   && cd /usr/local/src \
-  && git clone https://github.com/sipwise/rtpengine.git \
+  && git clone --depth 1 --branch mr12.4.1.4 https://github.com/sipwise/rtpengine.git \
   && cd rtpengine/daemon \
   && make && make install \
   && cp /usr/local/src/rtpengine/daemon/rtpengine /usr/local/bin/rtpengine \
