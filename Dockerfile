@@ -1,34 +1,76 @@
-FROM debian:stretch
+FROM debian:bookworm-slim AS build
 
-RUN apt-get update \
-  && apt-get -y --quiet --force-yes upgrade curl iproute2 \
-  && apt-get install -y --no-install-recommends ca-certificates gcc g++ make build-essential git iptables-dev libavfilter-dev \
-  libevent-dev libpcap-dev libxmlrpc-core-c3-dev markdown \
-  libjson-glib-dev default-libmysqlclient-dev libhiredis-dev libssl-dev \
-  libcurl4-openssl-dev libavcodec-extra gperf libspandsp-dev libwebsockets-dev\
-  && cd /usr/local/src \
-  && git clone https://github.com/sipwise/rtpengine.git \
-  && cd rtpengine/daemon \
-  && make && make install \
-  && cp /usr/local/src/rtpengine/daemon/rtpengine /usr/local/bin/rtpengine \
-  && rm -Rf /usr/local/src/rtpengine \
-  && apt-get purge -y --quiet --force-yes --auto-remove \
-  ca-certificates gcc g++ make build-essential git markdown \
-  && rm -rf /var/lib/apt/* \
-  && rm -rf /var/lib/dpkg/* \
-  && rm -rf /var/lib/cache/* \
-  && rm -Rf /var/log/* \
-  && rm -Rf /usr/local/src/* \
-  && rm -Rf /var/lib/apt/lists/* 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  build-essential \
+  ca-certificates \
+  curl \
+  default-libmysqlclient-dev \
+  g++ \
+  gcc \
+  git \
+  gperf \
+  iproute2 \
+  iptables \
+  libavcodec-extra \
+  libavfilter-dev \
+  libcurl4-openssl-dev \
+  libevent-dev \
+  libhiredis-dev \
+  libiptc-dev \
+  libjson-glib-dev \
+  libmnl-dev \
+  libnftnl-dev \
+  libopus-dev \
+  libpcap-dev \
+  libpcre3-dev \
+  libspandsp-dev \
+  libssl-dev \
+  libwebsockets-dev \
+  libxmlrpc-core-c3-dev \
+  make \
+  markdown \
+  pandoc
+
+WORKDIR /usr/src
+RUN git clone https://github.com/sipwise/rtpengine
+WORKDIR /usr/src/rtpengine/daemon
+RUN make -j$(nproc) install
+
+FROM debian:bookworm-slim
 
 VOLUME ["/tmp"]
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["rtpengine"]
 
 EXPOSE 23000-32768/udp 22222/udp
 
+RUN --mount=type=cache,target=/var/cache/apt \
+  apt-get update && apt-get install -y --no-install-recommends \
+  curl \
+  iproute2 \
+  iptables \
+  libglib2.0-0 \
+  libavcodec-extra \
+  libavfilter8 \
+  libcurl4 \
+  libevent-2.1-7 \
+  libevent-pthreads-2.1-7 \
+  libhiredis0.14 \
+  libip6tc2 \
+  libiptc0 \
+  libjson-glib-1.0-0 \
+  libmariadb3 \
+  libmnl0 \
+  libnftnl11 \
+  libopus0 \
+  libpcap0.8 \
+  libpcre3 \
+  libspandsp2 \
+  libssl3 \
+  libwebsockets17 \
+  libxmlrpc-core-c3 \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY --from=build /usr/src/rtpengine/daemon/rtpengine /usr/local/bin/rtpengine
 COPY ./entrypoint.sh /entrypoint.sh
-
 COPY ./rtpengine.conf /etc
-
-ENTRYPOINT ["/entrypoint.sh"]
-
-CMD ["rtpengine"]
